@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الإبداع - محرر نصوص متعدد الثيمات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f3f4f6;
+            --bg-editor: #ffffff;
+            --text-main: #1f2937;
+            --accent: #1d4ed8;
+            --ribbon-bg: #ffffff;
+            --border-color: #e5e7eb;
+        }
+
+        /* الثيمات */
+        .theme-dark {
+            --bg-main: #111827;
+            --bg-editor: #1f2937;
+            --text-main: #f9fafb;
+            --accent: #3b82f6;
+            --ribbon-bg: #1f2937;
+            --border-color: #374151;
+        }
+
+        .theme-sepia {
+            --bg-main: #f4ecd8;
+            --bg-editor: #fdf6e3;
+            --text-main: #5b4636;
+            --accent: #8b4513;
+            --ribbon-bg: #eee8d5;
+            --border-color: #d3c6aa;
+        }
+
+        .theme-blue {
+            --bg-main: #ebf5ff;
+            --bg-editor: #ffffff;
+            --text-main: #1e3a8a;
+            --accent: #2563eb;
+            --ribbon-bg: #dbeafe;
+            --border-color: #bfdbfe;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Ribbon Styling */
+        .ribbon-section {
+            @apply flex flex-col items-center border-l px-2 py-1 last:border-l-0;
+            border-color: var(--border-color);
+        }
+        .ribbon-group {
+            @apply flex items-center gap-1 flex-wrap justify-center;
+        }
+        .tool-btn {
+            @apply p-1.5 rounded transition-all flex flex-col items-center justify-center min-w-[45px] text-[10px];
+            color: var(--text-main);
+        }
+        .tool-btn:hover { background-color: rgba(0,0,0,0.05); }
+        .tool-btn i { @apply w-4 h-4; }
+        .tool-btn:active { @apply scale-95; }
+
+        .editor-paper {
+            background-color: var(--bg-editor);
+            @apply shadow-2xl mx-auto outline-none transition-all;
+            min-height: 29.7cm;
+            width: 21cm;
+            padding: 2.5cm;
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        @media (max-width: 1024px) {
+            .editor-paper { width: 95%; padding: 1cm; min-height: auto; }
+        }
+
+        /* أماكن الإعلانات */
+        .ad-space {
+            @apply bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs rounded transition-all;
+        }
+        .ad-top { height: 90px; width: 728px; @apply mx-auto my-2; }
+        .ad-sidebar { width: 160px; height: 600px; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        #editor table { @apply border-collapse w-full my-4 border; border-color: var(--border-color); }
+        #editor td { @apply border p-2; border-color: var(--border-color); }
+    </style>
+</head>
+<body id="app-body" class="flex flex-col h-screen">
+
+    <!-- Header -->
+    <header class="bg-blue-700 text-white px-4 py-2 flex justify-between items-center no-print shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-white/20 p-2 rounded-lg">
+                <i data-lucide="file-text" class="w-6 h-6 text-white"></i>
+            </div>
+            <h1 class="font-bold text-lg hidden sm:block">منصة الإبداع - محرر النصوص</h1>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <!-- تبديل الثيمات -->
+            <div class="flex items-center bg-blue-800 rounded-lg p-1 gap-1">
+                <button onclick="setTheme('')" class="w-6 h-6 rounded-full bg-white border border-gray-300" title="فاتح"></button>
+                <button onclick="setTheme('theme-dark')" class="w-6 h-6 rounded-full bg-gray-900 border border-gray-600" title="داكن"></button>
+                <button onclick="setTheme('theme-sepia')" class="w-6 h-6 rounded-full bg-[#f4ecd8] border border-sepia-400" title="سيبيا"></button>
+                <button onclick="setTheme('theme-blue')" class="w-6 h-6 rounded-full bg-blue-400 border border-blue-600" title="أزرق"></button>
+            </div>
+
+            <button onclick="saveDocument()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all">
+                <i data-lucide="save" class="w-4 h-4"></i> حفظ
+            </button>
+            <a href="https://wa.me/9647762360338" target="_blank" class="bg-green-500 hover:bg-green-600 p-2 rounded-full shadow-md transition-all">
+                <i data-lucide="message-circle" class="w-5 h-5 text-white"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Ad Top -->
+    <div class="ad-space ad-top no-print hidden lg:flex">
+        مساحة إعلانية (728x90)
+    </div>
+
+    <!-- Word Ribbon Toolbar -->
+    <div class="bg-white border-b shadow-sm no-print overflow-x-auto no-scrollbar shrink-0" style="background-color: var(--ribbon-bg); border-color: var(--border-color);">
+        <div class="flex p-1 h-24 min-w-max">
+            
+            <!-- Clipboard -->
+            <div class="ribbon-section">
+                <div class="flex flex-col h-full gap-1">
+                    <button onclick="exec('paste')" class="tool-btn flex-1 bg-gray-50/50 h-full">
+                        <i data-lucide="clipboard" class="w-6 h-6"></i>
+                        <span class="mt-1 font-bold">لصق</span>
+                    </button>
+                    <div class="flex">
+                        <button onclick="exec('cut')" class="p-1" title="قص"><i data-lucide="scissors" class="w-3 h-3"></i></button>
+                        <button onclick="exec('copy')" class="p-1" title="نسخ"><i data-lucide="copy" class="w-3 h-3"></i></button>
+                    </div>
+                </div>
+                <span class="text-[8px] text-gray-400 mt-auto uppercase font-bold">الحافظة</span>
+            </div>
+
+            <!-- Font -->
+            <div class="ribbon-section">
+                <div class="flex flex-col gap-1">
+                    <div class="flex gap-1 items-center">
+                        <select onchange="exec('fontName', this.value)" class="text-[10px] border rounded px-1 w-28 h-6 outline-none bg-transparent">
+                            <option value="Cairo">Cairo</option>
+                            <option value="Arial">Arial</option>
+                            <option value="Amiri">Amiri</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                        </select>
+                        <select onchange="exec('fontSize', this.value)" class="text-[10px] border rounded px-1 h-6 outline-none bg-transparent">
+                            <option value="1">8</option>
+                            <option value="2">10</option>
+                            <option value="3" selected>12</option>
+                            <option value="4">16</option>
+                            <option value="5">24</option>
+                            <option value="6">36</option>
+                        </select>
+                    </div>
+                    <div class="ribbon-group">
+                        <button onclick="exec('bold')" class="tool-btn font-black border-r px-2">B</button>
+                        <button onclick="exec('italic')" class="tool-btn italic px-2">I</button>
+                        <button onclick="exec('underline')" class="tool-btn underline px-2">U</button>
+                        <button onclick="exec('strikeThrough')" class="tool-btn line-through">abc</button>
+                        <button onclick="exec('subscript')" class="tool-btn text-[8px]">x₂</button>
+                        <button onclick="exec('superscript')" class="tool-btn text-[8px]">x²</button>
+                        <input type="color" onchange="exec('foreColor', this.value)" class="w-4 h-4 border-none cursor-pointer bg-transparent" title="لون الخط">
+                        <input type="color" onchange="exec('hiliteColor', this.value)" value="#ffff00" class="w-4 h-4 border-none cursor-pointer bg-transparent" title="تمييز">
+                    </div>
+                </div>
+                <span class="text-[8px] text-gray-400 mt-auto uppercase font-bold">خط</span>
+            </div>
+
+            <!-- Paragraph -->
+            <div class="ribbon-section">
+                <div class="flex flex-col gap-1">
+                    <div class="ribbon-group">
+                        <button onclick="exec('insertUnorderedList')" class="p-1"><i data-lucide="list" class="w-4 h-4"></i></button>
+                        <button onclick="exec('insertOrderedList')" class="p-1"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
+                        <button onclick="exec('justifyRight')" class="p-1"><i data-lucide="align-right" class="w-4 h-4"></i></button>
+                        <button onclick="exec('justifyCenter')" class="p-1"><i data-lucide="align-center" class="w-4 h-4"></i></button>
+                        <button onclick="exec('justifyLeft')" class="p-1"><i data-lucide="align-left" class="w-4 h-4"></i></button>
+                    </div>
+                    <div class="ribbon-group">
+                        <button onclick="exec('outdent')" class="p-1"><i data-lucide="indent-decrease" class="w-4 h-4"></i></button>
+                        <button onclick="exec('indent')" class="p-1"><i data-lucide="indent-increase" class="w-4 h-4"></i></button>
+                        <button onclick="exec('justifyFull')" class="p-1"><i data-lucide="align-justify" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+                <span class="text-[8px] text-gray-400 mt-auto uppercase font-bold">فقرة</span>
+            </div>
+
+            <!-- Insert -->
+            <div class="ribbon-section">
+                <div class="ribbon-group">
+                    <button onclick="document.getElementById('file-in').click()" class="tool-btn">
+                        <i data-lucide="image" class="text-blue-500"></i><span>صورة</span>
+                    </button>
+                    <button onclick="insertTable()" class="tool-btn">
+                        <i data-lucide="table" class="text-blue-500"></i><span>جدول</span>
+                    </button>
+                    <button onclick="saveAsWord()" class="tool-btn text-indigo-700">
+                        <i data-lucide="file-text" class="text-indigo-700"></i><span>Word</span>
+                    </button>
+                    <button onclick="saveAsPDF()" class="tool-btn bg-red-50">
+                        <i data-lucide="file-type-2" class="text-red-600"></i><span>PDF</span>
+                    </button>
+                </div>
+                <span class="text-[8px] text-gray-400 mt-auto uppercase font-bold">إدراج</span>
+            </div>
+
+            <input type="file" id="file-in" class="hidden" accept="image/*" onchange="handleImage(this)">
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Sidebar Ad Left -->
+        <div class="ad-space ad-sidebar no-print hidden xl:flex m-2 shrink-0">
+            إعلان جانبي (160x600)
+        </div>
+
+        <!-- Editor Viewport -->
+        <div id="workspace" class="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col items-center">
+            <div id="editor" class="editor-paper" contenteditable="true" spellcheck="false">
+                <h1 style="text-align: center;">مستند جديد</h1>
+                <p>ابدأ الكتابة هنا.. تم تفعيل الثيمات المتعددة ومساحات الإعلانات.</p>
+            </div>
+        </div>
+
+        <!-- Sidebar Ad Right -->
+        <div class="ad-space ad-sidebar no-print hidden xl:flex m-2 shrink-0">
+            إعلان جانبي (160x600)
+        </div>
+    </div>
+
+    <!-- Floating Toast -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-2 rounded-full text-xs font-bold opacity-0 transition-opacity pointer-events-none z-[100] shadow-xl"></div>
+
+    <script>
+        lucide.createIcons();
+
+        // --- الثيمات ---
+        function setTheme(theme) {
+            const body = document.getElementById('app-body');
+            body.className = 'flex flex-col h-screen ' + theme;
+            showToast("تم تغيير الثيم بنجاح");
+        }
+
+        // --- الأوامر ---
+        function exec(cmd, val = null) {
+            document.execCommand(cmd, false, val);
+            document.getElementById('editor').focus();
+        }
+
+        function insertTable() {
+            const rows = prompt("عدد الصفوف:", 3);
+            const cols = prompt("عدد الأعمدة:", 3);
+            if(!rows || !cols) return;
+            let table = '<table>';
+            for(let i=0; i<rows; i++){
+                table += '<tr>';
+                for(let j=0; j<cols; j++) table += '<td>...</td>';
+                table += '</tr>';
+            }
+            table += '</table><p><br></p>';
+            exec('insertHTML', table);
+        }
+
+        function handleImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = `<img src="${e.target.result}" style="max-width:100%; border-radius:8px; margin:10px auto; display:block;">`;
+                    exec('insertHTML', img);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // --- التصدير ---
+        function saveDocument() {
+            saveAsPDF();
+        }
+
+        async function saveAsPDF() {
+            const element = document.getElementById('editor');
+            showToast("جاري تحضير ملف PDF...");
+            
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: `document_${Date.now()}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            try {
+                await html2pdf().set(opt).from(element).save();
+                showToast("تم الحفظ بنجاح");
+            } catch (err) {
+                showToast("خطأ أثناء الحفظ");
+            }
+        }
+
+        function saveAsWord() {
+            const content = document.getElementById('editor').innerHTML;
+            const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40' dir='rtl'>
+            <head><meta charset='utf-8'><style>body{font-family:'Cairo', sans-serif;} table{border:1px solid #ddd; border-collapse:collapse; width:100%;} td{border:1px solid #ddd; padding:8px;}</style></head><body>`;
+            const footer = "</body></html>";
+            const blob = new Blob(['\ufeff', header + content + footer], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = 'document.doc';
+            a.click();
+            showToast("تم تحميل ملف Word");
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.opacity = '1';
+            setTimeout(() => t.style.opacity = '0', 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('editor').focus();
+        });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الإبداع - محرر نصوص متعدد الثيمات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f3f4f6;
+            --bg-editor: #ffffff;
+            --text-main: #1f2937;
+            --accent: #1d4ed8;
+            --ribbon-bg: #ffffff;
+            --border-color: #e5e7eb;
+        }
+
+        /* الثيمات */
+        .theme-dark {
+            --bg-main: #111827;
+            --bg-editor: #1f2937;
+            --text-main: #f9fafb;
+            --accent: #3b82f6;
+            --ribbon-bg: #1f2937;
+            --border-color: #374151;
+        }
+
+        .theme-sepia {
+            --bg-main: #f4ecd8;
+            --bg-editor: #fdf6e3;
+            --text-main: #5b4636;
+            --accent: #8b4513;
+            --ribbon-bg: #eee8d5;
+            --border-color: #d3c6aa;
+        }
+
+        .theme-blue {
+            --bg-main: #ebf5ff;
+            --bg-editor: #ffffff;
+            --text-main: #1e3a8a;
+            --accent: #2563eb;
+            --ribbon-bg: #dbeafe;
+            --border-color: #bfdbfe;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Ribbon Styling */
+        .ribbon-section {
+            @apply flex flex-col items-center border-l px-2 py-1 last:border-l-0;
+            border-color: var(--border-color);
+        }
+        .ribbon-group {
+            @apply flex items-center gap-1 flex-wrap justify-center;
+        }
+        .tool-btn {
+            @apply p-1.5 rounded transition-all flex flex-col items-center justify-center min-w-[45px] text-[10px];
+            color: var(--text-main);
+        }
+        .tool-btn:hover { background-color: rgba(0,0,0,0.05); }
+        .tool-btn i { @apply w-4 h-4; }
+        .tool-btn:active { @apply scale-95; }
+
+        .editor-paper {
+            background-color: var(--bg-editor);
+            @apply shadow-2xl mx-auto outline-none transition-all;
+            min-height: 29.7cm;
+            width: 21cm;
+            padding: 2.5cm;
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        @media (max-width: 1024px) {
+            .editor-paper { width: 95%; padding: 1cm; min-height: auto; }
+        }
+
+        /* أماكن الإعلانات */
+        .ad-space {
+            @apply bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs rounded transition-all;
+        }
+        .ad-top { height: 90px; width: 728px; @apply mx-auto my-2; }
+        .ad-sidebar { width: 160px; height: 600px; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        #editor table { @apply border-collapse w-full my-4 border; border-color: var(--border-color); }
+        #editor td { @apply border p-2; border-color: var(--border-color); }
+    </style>
+</head>
+<body id="app-body" class="flex flex-col h-screen">
+
+    <!-- Header -->
+    <header class="bg-blue-700 text-white px-4 py-2 flex justify-between items-center no-print shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-white/20 p-2 rounded-lg">
+                <i data-lucide="file-text" class="w-6 h-6 text-white"></i>
+            </div>
+            <h1 class="font-bold text-lg hidden sm:block">منصة الإبداع - محرر النصوص</h1>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <!-- تبديل الثيمات -->
+            <div class="flex items-center bg-blue-800 rounded-lg p-1 gap-1">
+                <button onclick="setTheme('')" class="w-6 h-6 rounded-full bg-white border border-gray-300" title="فاتح"></button>
+                <button onclick="setTheme('theme-dark')" class="w-6 h-6 rounded-full bg-gray-900 border border-gray-600" title="داكن"></button>
+                <button onclick="setTheme('theme-sepia')" class="w-6 h-6 rounded-full bg-[#f4ecd8] border border-sepia-400" title="سيبيا"></button>
+                <button onclick="setTheme('theme-blue')" class="w-6 h-6 rounded-full bg-blue-400 border border-blue-600" title="أزرق"></button>
+            </div>
+
+            <button onclick="saveDocument()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all">
+                <i data-lucide="save" class="w-4 h-4"></i> حفظ
+            </button>
+            <a href="https://wa.me/9647762360338" target="_blank" class="bg-green-500 hover:bg-green-600 p-2 rounded-full shadow-md transition-all">
+                <i data-lucide="message-circle" class="w-5 h-5 text-white"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Ad Top -->
+    <div class="ad-space ad-top no-print hidden lg:flex">
+        مساحة إعلانية (728x90)
+    </div>
+
+    <!-- Word Ribbon Toolbar -->
+    <div class="bg-white border-b shadow-sm no-print overflow-x-auto no-scrollbar shrink-0" style="background-color: var(--ribbon-bg); border-color: var(--border-color);">
+        <div class="flex p-1 h-24 min-w-max">
+            
+            <!-- Clipboard -->
+            <div class="ribbon-section">
+                <div class="flex flex-col h-full gap-1">
+                    <button onclick="exec('paste')" class="tool-btn flex-1 bg-gray-50/50 h-full">
+                        <i data-lucide="clipboard" class="w-6 h-6"></i>
+                        <span class="mt-1 font-bold">لصق</span>
+                    </button>
+                    <div class="flex">
+                        <button onclick="exec('cut')" class="p-1" title="قص"><i data-lucide="scissors" class="w-3 h-3"></i></button>
+                        <button onclick="exec('copy')" class="p-1" title="نسخ"><i data-lucide="copy" class="w-3 h-3"></i></button>
+                    </div>
+                </div>
+                <span class="text-[8px] text-gray-400 mt-auto uppercase font-bold">الحافظة</span>
+            </div>
+
+            <!-- Font -->
+            <div class="ribbon-section">
+                <div class="flex flex-col gap-1">
+                    <div class="flex gap-1 items-center">
+                        <select onchange="exec('fontName', this.value)" class="text-[10px] border rounded px-1 w-28 h-6 outline-none bg-transparent">
+                            <option value="Cairo">Cairo</option>
+                            <option value="Arial">Arial</option>
+                            <option value="Amiri">Amiri</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                        </select>
+                        <select onchange="exec('fontSize', this.value)" class="text-[10px] border rounded px-1 h-6 outline-none bg-transparent">
+                            <option value="1">8</option>
+                            <option value="2">10</option>
+                            <option value="3" selected>12</option>
+                            <option value="4">16</option>
+                            <option value="5">24</option>
+                            <option value="6">36</option>
+                        </select>
+                    </div>
+                    <div class="ribbon-group">
+                        <button onclick="exec('bold')" class="tool-btn font-black border-r px-2">B</button>
+                        <button onclick="exec('italic')" class="tool-btn italic px-2">I</button>
+                        <button onclick="exec('underline')" class="tool-btn underline px-2">U</button>
+                        <button onclick="exec('strikeThrough')" class="tool-btn line-through">abc</button>
+                        <button onclick="exec('subscript')" class="tool-btn text-[8px]">x₂</button>
+                        <button onclick="exec('superscript')" class="tool-btn text-[8px]">x²</button>
+                        <input type="color" onchange="exec('foreColor', this.value)" class="w-4 h-4 border-none cursor-pointer bg-transparent" title="لون الخط">
+                        <input type="color" onchange="exec('hiliteColor', this.value)" value="#ffff00" class="w-4 h-4 border-none cursor-pointer bg-transparent" title="تمييز">
+                    </div>
+                </div>
+                <span class="text-[8px] text-gray-400 mt-auto uppercase font-bold">خط</span>
+            </div>
+
+            <!-- Paragraph -->
+            <div class="ribbon-section">
+                <div class="flex flex-col gap-1">
+                    <div class="ribbon-group">
+                        <button onclick="exec('insertUnorderedList')" class="p-1"><i data-lucide="list" class="w-4 h-4"></i></button>
+                        <button onclick="exec('insertOrderedList')" class="p-1"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
+                        <button onclick="exec('justifyRight')" class="p-1"><i data-lucide="align-right" class="w-4 h-4"></i></button>
+                        <button onclick="exec('justifyCenter')" class="p-1"><i data-lucide="align-center" class="w-4 h-4"></i></button>
+                        <button onclick="exec('justifyLeft')" class="p-1"><i data-lucide="align-left" class="w-4 h-4"></i></button>
+                    </div>
+                    <div class="ribbon-group">
+                        <button onclick="exec('outdent')" class="p-1"><i data-lucide="indent-decrease" class="w-4 h-4"></i></button>
+                        <button onclick="exec('indent')" class="p-1"><i data-lucide="indent-increase" class="w-4 h-4"></i></button>
+                        <button onclick="exec('justifyFull')" class="p-1"><i data-lucide="align-justify" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+                <span class="text-[8px] text-gray-400 mt-auto uppercase font-bold">فقرة</span>
+            </div>
+
+            <!-- Insert -->
+            <div class="ribbon-section">
+                <div class="ribbon-group">
+                    <button onclick="document.getElementById('file-in').click()" class="tool-btn">
+                        <i data-lucide="image" class="text-blue-500"></i><span>صورة</span>
+                    </button>
+                    <button onclick="insertTable()" class="tool-btn">
+                        <i data-lucide="table" class="text-blue-500"></i><span>جدول</span>
+                    </button>
+                    <button onclick="saveAsWord()" class="tool-btn text-indigo-700">
+                        <i data-lucide="file-text" class="text-indigo-700"></i><span>Word</span>
+                    </button>
+                    <button onclick="saveAsPDF()" class="tool-btn bg-red-50">
+                        <i data-lucide="file-type-2" class="text-red-600"></i><span>PDF</span>
+                    </button>
+                </div>
+                <span class="text-[8px] text-gray-400 mt-auto uppercase font-bold">إدراج</span>
+            </div>
+
+            <input type="file" id="file-in" class="hidden" accept="image/*" onchange="handleImage(this)">
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Sidebar Ad Left -->
+        <div class="ad-space ad-sidebar no-print hidden xl:flex m-2 shrink-0">
+            إعلان جانبي (160x600)
+        </div>
+
+        <!-- Editor Viewport -->
+        <div id="workspace" class="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col items-center">
+            <div id="editor" class="editor-paper" contenteditable="true" spellcheck="false">
+                <h1 style="text-align: center;">مستند جديد</h1>
+                <p>ابدأ الكتابة هنا.. تم تفعيل الثيمات المتعددة ومساحات الإعلانات.</p>
+            </div>
+        </div>
+
+        <!-- Sidebar Ad Right -->
+        <div class="ad-space ad-sidebar no-print hidden xl:flex m-2 shrink-0">
+            إعلان جانبي (160x600)
+        </div>
+    </div>
+
+    <!-- Floating Toast -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-2 rounded-full text-xs font-bold opacity-0 transition-opacity pointer-events-none z-[100] shadow-xl"></div>
+
+    <script>
+        lucide.createIcons();
+
+        // --- الثيمات ---
+        function setTheme(theme) {
+            const body = document.getElementById('app-body');
+            body.className = 'flex flex-col h-screen ' + theme;
+            showToast("تم تغيير الثيم بنجاح");
+        }
+
+        // --- الأوامر ---
+        function exec(cmd, val = null) {
+            document.execCommand(cmd, false, val);
+            document.getElementById('editor').focus();
+        }
+
+        function insertTable() {
+            const rows = prompt("عدد الصفوف:", 3);
+            const cols = prompt("عدد الأعمدة:", 3);
+            if(!rows || !cols) return;
+            let table = '<table>';
+            for(let i=0; i<rows; i++){
+                table += '<tr>';
+                for(let j=0; j<cols; j++) table += '<td>...</td>';
+                table += '</tr>';
+            }
+            table += '</table><p><br></p>';
+            exec('insertHTML', table);
+        }
+
+        function handleImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = `<img src="${e.target.result}" style="max-width:100%; border-radius:8px; margin:10px auto; display:block;">`;
+                    exec('insertHTML', img);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // --- التصدير ---
+        function saveDocument() {
+            saveAsPDF();
+        }
+
+        async function saveAsPDF() {
+            const element = document.getElementById('editor');
+            showToast("جاري تحضير ملف PDF...");
+            
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: `document_${Date.now()}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            try {
+                await html2pdf().set(opt).from(element).save();
+                showToast("تم الحفظ بنجاح");
+            } catch (err) {
+                showToast("خطأ أثناء الحفظ");
+            }
+        }
+
+        function saveAsWord() {
+            const content = document.getElementById('editor').innerHTML;
+            const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40' dir='rtl'>
+            <head><meta charset='utf-8'><style>body{font-family:'Cairo', sans-serif;} table{border:1px solid #ddd; border-collapse:collapse; width:100%;} td{border:1px solid #ddd; padding:8px;}</style></head><body>`;
+            const footer = "</body></html>";
+            const blob = new Blob(['\ufeff', header + content + footer], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = 'document.doc';
+            a.click();
+            showToast("تم تحميل ملف Word");
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.opacity = '1';
+            setTimeout(() => t.style.opacity = '0', 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('editor').focus();
+        });
+    </script>
+</body>
+</html>

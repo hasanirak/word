@@ -3,455 +3,630 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>منصة الإبداع - نسخة الهاتف الاحترافية</title>
+    <title>إبداع آب - المحرر الأكاديمي الشامل</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- استدعاء 40 خطاً متنوعاً -->
-    <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Cairo:wght@400;700;900&family=Tajawal:wght@400;700&family=Jomhuria&family=Lateef&family=Reem+Kufi&family=IBM+Plex+Sans+Arabic:wght@400;700&family=Almarai:wght@400;700;800&family=Aref+Ruqaa&family=Changa:wght@400;700&family=El+Messiri:wght@400;700&family=Lalezar&family=Lemonada:wght@400;700&family=Markazi+Text:wght@400;700&family=Mirza:wght@400;700&family=Scheherazade+New:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Kufi+Arabic:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&family=Qahiri&family=Rakkas&family=Mada:wght@400;700&family=Katibeh&family=Vibes&family=Arimo:wght@400;700&family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;900&family=Lora:wght@400;700&family=Oswald:wght@400;700&family=Raleway:wght@400;700&family=Merriweather:wght@400;700&family=Ubuntu:wght@400;700&family=PT+Sans:wght@400;700&family=Mukta:wght@400;700&family=Kanit:wght@400;700&family=Titillium+Web:wght@400;700&family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+    <!-- خطوط عربية وعالمية احترافية مع حل مشكلة CORS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;700;900&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet" crossorigin="anonymous">
     
+    <!-- محركات التحويل الجديدة (الحل النهائي للغة العربية) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+
     <style>
         :root {
-            --primary: #2b579a;
-            --ribbon-bg: #f3f4f7;
-            --border: #d1d5db;
-            --app-bg: #e5e7eb;
+            --app-bg: #f8fafc;
+            --surface: #ffffff;
+            --primary: #4f46e5;
+            --primary-light: #e0e7ff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --bottom-nav-height: 65px;
+            --header-height: 60px;
         }
 
-        .theme-dark { --primary: #1e1e1e; --ribbon-bg: #2d2d2d; --border: #444; --app-bg: #121212; color: #eee; }
-        .theme-gray { --primary: #444; --ribbon-bg: #eee; --border: #ccc; --app-bg: #ddd; }
-        .theme-purple { --primary: #6b21a8; --ribbon-bg: #faf5ff; --border: #e9d5ff; --app-bg: #f3e8ff; }
+        .dark-mode {
+            --app-bg: #0f172a;
+            --surface: #1e293b;
+            --primary: #6366f1;
+            --primary-light: #312e81;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
 
         body {
-            font-family: 'Segoe UI', 'Cairo', sans-serif;
+            font-family: 'Cairo', sans-serif;
             background-color: var(--app-bg);
+            color: var(--text-main);
             overflow: hidden;
-            touch-action: manipulation;
-            transition: background 0.3s ease;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        .app-header { background-color: var(--primary); color: white; padding: 5px 15px; display: flex; justify-content: space-between; align-items: center; height: 50px; flex-shrink: 0; z-index: 100; }
-        
-        .tabs-container { 
-            background-color: var(--primary); 
-            display: flex; 
-            padding: 0 5px; 
-            gap: 2px; 
-            height: 35px; 
-            align-items: flex-end; 
-            flex-shrink: 0; 
-            overflow-x: auto;
-        }
-        
-        .tab { padding: 5px 12px; color: white; font-size: 10px; cursor: pointer; border-radius: 6px 6px 0 0; transition: all 0.2s; white-space: nowrap; opacity: 0.8; }
-        .tab.active { background-color: var(--ribbon-bg); color: var(--primary); font-weight: bold; opacity: 1; }
-
-        .ribbon { 
-            background-color: var(--ribbon-bg); 
-            border-bottom: 1px solid var(--border); 
-            display: flex; 
-            align-items: stretch; 
-            height: 140px; 
-            overflow-x: auto; 
-            padding: 8px 10px; 
-            user-select: none; 
-            flex-shrink: 0; 
-            gap: 8px;
-        }
-        
-        .ribbon-section { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            border-left: 1px solid var(--border); 
-            padding: 0 10px; 
-            flex-shrink: 0; 
+        /* --- App Header --- */
+        .app-header {
+            height: var(--header-height);
+            background-color: var(--surface);
+            display: flex;
+            align-items: center;
             justify-content: space-between;
+            padding: 0 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            z-index: 40;
+            flex-shrink: 0;
         }
-        .ribbon-section:last-child { border-left: none; }
-        .ribbon-label { font-size: 9px; color: #888; margin-top: auto; padding-bottom: 2px; font-weight: bold; text-transform: uppercase; }
 
-        .btn-large { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px; min-width: 50px; border-radius: 8px; transition: all 0.1s; color: inherit; }
-        .btn-large i { width: 24px; height: 24px; color: var(--primary); }
-        .btn-large span { font-size: 9px; margin-top: 4px; font-weight: bold; }
+        /* --- Bottom Navigation --- */
+        .bottom-nav {
+            height: var(--bottom-nav-height);
+            background-color: var(--surface);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 40;
+            flex-shrink: 0;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
 
-        .workspace { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; align-items: center; background-color: var(--app-bg); }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--text-muted);
+            width: 80px;
+            height: 100%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item i { width: 22px; height: 22px; transition: transform 0.2s; }
+        .nav-item span { font-size: 11px; font-weight: 700; }
         
-        /* تحسين الورقة للهاتف لتظهر كاملة A4 */
-        .paper { 
-            background-color: white; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-            width: 21cm; 
-            min-height: 29.7cm; 
-            padding: 1.5cm; 
-            line-height: 1.6; 
-            outline: none; 
-            box-sizing: border-box; 
-            position: relative; 
-            transition: all 0.2s ease; 
-            color: #333; 
-            transform-origin: top center;
+        .nav-item.active { color: var(--primary); }
+        .nav-item.active i { transform: scale(1.15); stroke-width: 2.5px; }
+
+        /* --- Main Content Area --- */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+            scroll-behavior: smooth;
         }
 
-        /* ميديا كويري خاصة للهاتف لضمان ظهور الـ A4 كاملة */
+        /* View Container */
+        .view-section {
+            display: none;
+            height: 100%;
+            width: 100%;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease;
+        }
+        .view-section.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Formatting Toolbar --- */
+        .format-toolbar {
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px 12px;
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            flex-shrink: 0;
+        }
+        .format-toolbar::-webkit-scrollbar { display: none; }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding-left: 12px;
+            border-left: 1px solid var(--border-color);
+            scroll-snap-align: start;
+        }
+        .toolbar-group:last-child { border-left: none; padding-left: 0; }
+
+        .tool-btn {
+            width: 34px; height: 34px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; color: var(--text-main);
+            transition: background 0.2s; cursor: pointer;
+        }
+        .tool-btn:active { background: var(--primary-light); transform: scale(0.95); }
+        .tool-btn i { width: 18px; height: 18px; }
+
+        select.tool-select {
+            background: var(--app-bg); border: 1px solid var(--border-color);
+            color: var(--text-main); border-radius: 8px; padding: 4px 8px;
+            font-size: 12px; font-weight: 600; outline: none;
+        }
+
+        /* --- A4 Paper Container --- */
+        .paper-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .paper {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 210mm;
+            min-height: 297mm;
+            padding: 20mm 15mm;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 4px;
+            outline: none;
+            color: #0f172a;
+            direction: rtl;
+            font-size: 16px;
+            line-height: 1.8;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+            position: relative;
+        }
+        .dark-mode .paper { background-color: #ffffff; color: #0f172a; }
+
         @media (max-width: 768px) {
-            .paper { 
-                width: 95vw; 
-                min-height: 134.3vw; /* نسبة الـ A4 وهي 1.414 */
-                padding: 0.8cm;
-                font-size: 12px;
-            }
-            .ribbon { height: 130px; }
-            .app-header h1 { font-size: 14px; }
+            .paper { padding: 15mm 10mm; min-height: 141vw; }
         }
 
-        /* إطارات الغلاف */
-        .frame-classic { border: 10px double var(--primary) !important; }
-        .frame-gold { border: 8px double #b48c36 !important; }
-        .frame-royal { border: 6px solid #1e40af !important; outline: 2px solid #1e40af !important; outline-offset: 4px !important; }
-        .frame-ornament { border: 15px solid !important; border-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0 L100 0 L100 100 L0 100 Z' stroke='%231e40af' stroke-width='10'/%3E%3C/svg%3E") 30 round !important; }
-
-        #logo-container img { transition: all 0.2s ease; max-width: none !important; }
-        .hidden { display: none !important; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        /* --- إطارات الأغلفة --- */
+        .frame-none { border: none !important; }
+        .frame-classic { border: 12px double var(--primary) !important; padding: 15mm !important; }
+        .frame-gold { border: 8px solid #d4af37 !important; outline: 3px double #d4af37 !important; outline-offset: -12px !important; padding: 20mm !important; }
         
-        /* ستايل مخصص للسلايدرز على الهاتف */
-        input[type=range] { height: 6px; border-radius: 5px; background: #ddd; appearance: none; outline: none; }
-        input[type=range]::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; background: var(--primary); border-radius: 50%; cursor: pointer; }
+        /* --- Cover Tools Controls --- */
+        .cover-controls {
+            background: var(--surface);
+            padding: 12px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+        .control-pill {
+            background: var(--app-bg);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        /* --- PDF Tools Cards --- */
+        .tool-card {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin-bottom: 20px;
+        }
+
+        /* --- Floating UI --- */
+        .floating-export {
+            position: absolute;
+            bottom: 20px; right: 20px;
+            display: flex; flex-direction: column; gap: 10px;
+            z-index: 30;
+        }
+        .fab {
+            width: 50px; height: 50px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .fab:active { transform: scale(0.9); }
+        .fab-pdf { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .fab-word { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+
+        /* Sliders */
+        input[type=range] { height: 4px; background: var(--border-color); border-radius: 2px; appearance: none; width: 80px; }
+        input[type=range]::-webkit-slider-thumb { appearance: none; width: 16px; height: 16px; background: var(--primary); border-radius: 50%; }
+
+        /* فك القيود عن الشعار ليدعم 2000 بكسل */
+        #cover-logo, #logo-box {
+            max-width: none !important;
+            transition: transform 0.1s ease, width 0.1s ease;
+            position: relative;
+            z-index: 5;
+        }
     </style>
 </head>
-<body id="app-body" class="flex flex-col h-screen">
+<body>
 
     <!-- Header -->
-    <header class="app-header no-print">
-        <div class="flex items-center gap-2 cursor-pointer" onclick="showHome()">
-            <i data-lucide="layout-dashboard" class="w-5 h-5 text-white"></i>
-            <h1 class="font-bold">منصة الإبداع</h1>
+    <header class="app-header">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 p-2 rounded-xl text-white shadow-md">
+                <i data-lucide="pen-tool" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h1 class="font-black text-base leading-tight">إبداع آب</h1>
+                <p class="text-[10px] text-gray-500 font-bold" id="header-subtitle">محرر النصوص</p>
+            </div>
         </div>
         <div class="flex items-center gap-2">
-            <select onchange="changeTheme(this.value)" class="bg-white/20 text-white text-[9px] border-none rounded px-1 py-1 outline-none">
-                <option value="" class="text-black">أزرق</option>
-                <option value="theme-dark" class="text-black">داكن</option>
-                <option value="theme-purple" class="text-black">بنفسجي</option>
-            </select>
-            <div id="mode-label" class="text-[9px] font-bold bg-white/20 px-2 py-1 rounded-full uppercase">الرئيسية</div>
-            <a href="https://wa.me/9647762360338" target="_blank" class="bg-green-500 p-1 rounded-full">
-                <i data-lucide="message-circle" class="w-4 h-4 text-white"></i>
-            </a>
+            <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                <i data-lucide="moon" id="theme-icon" class="w-5 h-5"></i>
+            </button>
         </div>
     </header>
 
-    <!-- Tabs (Scrollable on Mobile) -->
-    <div class="tabs-container no-print no-scrollbar">
-        <div id="tab-home" class="tab active" onclick="showHome()">الرئيسية</div>
-        <div id="tab-word" class="tab" onclick="switchMode('word')">وورد</div>
-        <div id="tab-cover" class="tab" onclick="switchMode('cover')">أغلفة</div>
-        <div id="tab-merge" class="tab" onclick="switchMode('pdfmerge')">دمج PDF</div>
-        <div id="tab-img" class="tab" onclick="switchMode('imgtopdf')">صور ➜ PDF</div>
-    </div>
-
-    <!-- Content Area -->
-    <div id="main-content" class="flex flex-col flex-1 overflow-hidden">
+    <!-- Main Content -->
+    <main class="main-content">
         
-        <!-- Professional Ribbon Bar -->
-        <div id="ribbon-bar" class="ribbon no-scrollbar no-print hidden">
-            <!-- Clipboard -->
-            <div class="ribbon-section">
-                <div class="flex items-center gap-1 h-full">
-                    <button onclick="exec('paste')" class="btn-large"><i data-lucide="clipboard"></i><span>لصق</span></button>
-                    <div class="flex flex-col gap-1">
-                        <button onclick="exec('cut')" class="text-[9px] font-bold p-1 bg-white/50 rounded">قص</button>
-                        <button onclick="exec('copy')" class="text-[9px] font-bold p-1 bg-white/50 rounded">نسخ</button>
+        <!-- ================= VIEW 1: EDITOR ================= -->
+        <section id="view-editor" class="view-section active">
+            <!-- Toolbar -->
+            <div class="format-toolbar">
+                <div class="toolbar-group">
+                    <button onclick="exec('undo')" class="tool-btn" title="تراجع"><i data-lucide="undo-2"></i></button>
+                    <button onclick="exec('redo')" class="tool-btn" title="إعادة"><i data-lucide="redo-2"></i></button>
+                </div>
+                <div class="toolbar-group">
+                    <select onchange="exec('fontName', this.value)" class="tool-select w-24" title="نوع الخط">
+                        <option value="Cairo">Cairo</option>
+                        <option value="Amiri">Amiri</option>
+                        <option value="Tajawal">Tajawal</option>
+                        <option value="Reem Kufi">Reem Kufi</option>
+                    </select>
+                    <select onchange="exec('fontSize', this.value)" class="tool-select w-14" title="حجم الخط">
+                        <option value="1">10</option>
+                        <option value="2">12</option>
+                        <option value="3">14</option>
+                        <option value="4" selected>18</option>
+                        <option value="5">24</option>
+                        <option value="6">36</option>
+                        <option value="7">48</option>
+                    </select>
+                </div>
+                <div class="toolbar-group">
+                    <button onclick="exec('bold')" class="tool-btn font-black" title="عريض">B</button>
+                    <button onclick="exec('italic')" class="tool-btn italic" title="مائل">I</button>
+                    <button onclick="exec('underline')" class="tool-btn underline" title="تسطير">U</button>
+                    <button onclick="exec('strikeThrough')" class="tool-btn line-through font-bold" title="يتوسطه خط">S</button>
+                    <button onclick="exec('subscript')" class="tool-btn text-[10px] font-bold">X₂</button>
+                    <button onclick="exec('superscript')" class="tool-btn text-[10px] font-bold">X²</button>
+                    <input type="color" onchange="exec('foreColor', this.value)" class="w-8 h-8 p-1 rounded-lg border-none bg-transparent cursor-pointer" title="لون النص">
+                    <button onclick="exec('removeFormat')" class="tool-btn text-red-500" title="مسح التنسيق"><i data-lucide="eraser"></i></button>
+                </div>
+                <div class="toolbar-group">
+                    <button onclick="exec('justifyRight')" class="tool-btn"><i data-lucide="align-right"></i></button>
+                    <button onclick="exec('justifyCenter')" class="tool-btn"><i data-lucide="align-center"></i></button>
+                    <button onclick="exec('justifyLeft')" class="tool-btn"><i data-lucide="align-left"></i></button>
+                </div>
+                <div class="toolbar-group">
+                    <button onclick="exec('insertUnorderedList')" class="tool-btn" title="قائمة نقطية"><i data-lucide="list"></i></button>
+                    <button onclick="exec('insertOrderedList')" class="tool-btn" title="قائمة رقمية"><i data-lucide="list-ordered"></i></button>
+                </div>
+                <div class="toolbar-group">
+                    <button onclick="triggerEditorImageUpload()" class="tool-btn text-blue-600" title="إدراج صورة"><i data-lucide="image-plus"></i></button>
+                    <button onclick="insertTable()" class="tool-btn text-emerald-600" title="إدراج جدول"><i data-lucide="table"></i></button>
+                </div>
+            </div>
+
+            <input type="file" id="editor-img-upload" accept="image/*" class="hidden" onchange="insertImageToEditor(this)">
+
+            <!-- Paper -->
+            <div class="paper-wrapper">
+                <div id="editor" class="paper frame-none" contenteditable="true" spellcheck="false">
+                    <h1 style="text-align: center; color: #4f46e5; font-size: 28px; font-weight: 900;">مستند جديد</h1>
+                    <p style="text-align: center;">ابدأ الكتابة هنا... هذه المنصة مستقلة وتعمل بدون انترنت لضمان الخصوصية وسرعة الأداء.</p>
+                </div>
+            </div>
+
+            <!-- Floating Export Buttons -->
+            <div class="floating-export">
+                <button onclick="savePDF('editor')" class="fab fab-pdf" title="حفظ PDF مباشر">
+                    <i data-lucide="file-down"></i>
+                </button>
+                <button onclick="saveWord('editor')" class="fab fab-word" title="حفظ Word">
+                    <i data-lucide="file-output"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 2: COVER DESIGNER ================= -->
+        <section id="view-cover" class="view-section">
+            <div class="cover-controls">
+                <button onclick="insertCover()" class="control-pill !bg-indigo-600 !text-white font-bold border-none cursor-pointer">
+                    <i data-lucide="layout-template" class="w-4 h-4"></i> قالب جاهز
+                </button>
+                <div class="control-pill">
+                    <span class="text-[10px] font-bold">الإطار:</span>
+                    <select onchange="applyFrame(this.value)" class="tool-select !p-1 !text-[10px] border-none bg-transparent">
+                        <option value="frame-none">بدون إطار</option>
+                        <option value="frame-classic">كلاسيك أزرق</option>
+                        <option value="frame-gold">ملكي ذهبي</option>
+                    </select>
+                </div>
+                <div class="control-pill" title="تكبير/تصغير الشعار">
+                    <i data-lucide="image" class="w-4 h-4 text-indigo-600"></i>
+                    <input type="range" min="10" max="2000" value="120" oninput="updateLogoTransform('scale', this.value)">
+                </div>
+                <div class="control-pill" title="تحريك الشعار أفقياً">
+                    <i data-lucide="move-horizontal" class="w-4 h-4 text-indigo-600"></i>
+                    <input type="range" min="-1000" max="1000" value="0" oninput="updateLogoTransform('x', this.value)">
+                </div>
+                <div class="control-pill" title="تحريك الشعار عمودياً">
+                    <i data-lucide="move-vertical" class="w-4 h-4 text-indigo-600"></i>
+                    <input type="range" min="-1000" max="1000" value="0" oninput="updateLogoTransform('y', this.value)">
+                </div>
+            </div>
+
+            <div class="paper-wrapper">
+                <div id="cover-editor" class="paper frame-classic" contenteditable="true" spellcheck="false"></div>
+            </div>
+
+            <div class="floating-export">
+                <button onclick="savePDF('cover-editor')" class="fab fab-pdf"><i data-lucide="file-down"></i></button>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 3: PDF TOOLS ================= -->
+        <section id="view-tools" class="view-section p-5">
+            <h2 class="text-2xl font-black mb-6 text-center">أدوات PDF المستقلة</h2>
+            
+            <div class="tool-card">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="bg-orange-100 dark:bg-orange-900/50 p-3 rounded-2xl text-orange-600"><i data-lucide="combine" class="w-8 h-8"></i></div>
+                    <div>
+                        <h3 class="font-black text-lg">دمج ملفات PDF</h3>
+                        <p class="text-xs text-slate-500">اختر عدة ملفات لدمجها في ملف واحد محلياً</p>
                     </div>
                 </div>
-                <div class="ribbon-label">الحافظة</div>
-            </div>
-
-            <!-- Font Tools (40 Fonts) -->
-            <div class="ribbon-section">
-                <div class="flex flex-col gap-1">
-                    <div class="flex gap-1 items-center">
-                        <select id="font-family-select" onchange="exec('fontName', this.value)" class="text-[10px] border border-gray-300 rounded px-1 h-6 w-24 outline-none">
-                            <option value="Cairo">Cairo</option>
-                            <option value="Amiri">Amiri</option>
-                            <option value="Tajawal">Tajawal</option>
-                            <option value="Jomhuria">Jomhuria</option>
-                            <option value="Almarai">Almarai</option>
-                            <option value="Reem Kufi">Reem Kufi</option>
-                            <option value="Vibes">Vibes</option>
-                            <option value="Roboto">Roboto</option>
-                            <option value="Montserrat">Montserrat</option>
-                        </select>
-                        <select onchange="exec('fontSize', this.value)" class="text-[10px] border border-gray-300 rounded h-6 w-8">
-                            <option value="2">10</option><option value="3">12</option><option value="4" selected>14</option><option value="5">18</option>
-                        </select>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <button onclick="exec('bold')" class="p-1 font-bold border rounded bg-white">B</button>
-                        <button onclick="exec('underline')" class="p-1 underline border rounded bg-white">U</button>
-                        <input type="color" onchange="exec('foreColor', this.value)" class="w-5 h-5 border-none p-0 bg-transparent">
-                        <button onclick="exec('removeFormat')" class="p-1 text-red-500"><i data-lucide="eraser" class="w-3 h-3"></i></button>
-                    </div>
-                </div>
-                <div class="ribbon-label">تنسيق</div>
-            </div>
-
-            <!-- Cover Special Tools -->
-            <div id="cover-extra-ribbon" class="ribbon-section bg-blue-50/50 hidden">
-                <div class="flex flex-col gap-1 justify-center h-full">
-                    <div class="flex gap-1">
-                        <button onclick="insertCoverTemplate()" class="bg-indigo-600 text-white px-2 py-1 rounded text-[9px] font-bold">قالب</button>
-                        <select onchange="applyFrame(this.value)" class="text-[9px] border border-indigo-200 rounded px-1 h-6 w-20 bg-white font-bold outline-none">
-                            <option value="paper">بلا إطار</option>
-                            <option value="paper frame-classic">جامعي</option>
-                            <option value="paper frame-gold">ذهبي</option>
-                            <option value="paper frame-royal">ملكي</option>
-                            <option value="paper frame-ornament">زخرفي</option>
-                        </select>
-                    </div>
-                    <div class="flex flex-col gap-1 bg-white/70 p-1 rounded border border-indigo-100">
-                        <div class="flex items-center gap-1"><span class="text-[7px] font-bold">الحجم:</span><input type="range" min="40" max="1000" value="100" oninput="resizeLogo(this.value)" class="w-16"></div>
-                        <div class="flex items-center gap-1"><span class="text-[7px] font-bold">تحريك:</span><input type="range" min="-300" max="300" value="0" oninput="moveLogoH(this.value)" class="w-16"></div>
-                        <div class="flex items-center gap-1"><span class="text-[7px] font-bold text-red-500">إزاحة:</span><input type="range" min="0" max="150" value="50" oninput="moveFrame(this.value)" class="w-16"></div>
-                    </div>
-                </div>
-                <div class="ribbon-label">تصميم</div>
-            </div>
-
-            <!-- Actions -->
-            <div class="ribbon-section">
-                <div class="flex gap-2">
-                    <button onclick="savePDF()" class="btn-large text-red-600"><i data-lucide="file-type-2"></i><span>PDF</span></button>
-                    <button onclick="saveAsWord()" class="btn-large text-blue-800"><i data-lucide="save"></i><span>DOC</span></button>
-                </div>
-                <div class="ribbon-label">تصدير</div>
-            </div>
-        </div>
-
-        <!-- Workspaces -->
-        <div id="workspace" class="workspace hidden">
-            <!-- Editor (Word & Cover) -->
-            <div id="editor-container" class="w-full flex justify-center">
-                <div id="editor" class="paper" contenteditable="true" spellcheck="false"></div>
-            </div>
-
-            <!-- Other tools containers (Merge, Image to PDF) -->
-            <div id="merge-container" class="hidden w-full max-w-md bg-white p-5 rounded-2xl shadow-xl">
-                <h3 class="text-lg font-black text-center mb-4">دمج PDF</h3>
                 <input type="file" id="pdf-input" multiple accept=".pdf" class="hidden" onchange="handlePdfs(this)">
-                <button onclick="document.getElementById('pdf-input').click()" class="w-full border-2 border-dashed border-blue-200 p-8 rounded-xl font-bold text-blue-600 flex flex-col items-center gap-2 mb-4">
-                    <i data-lucide="plus-square"></i><span>اختر الملفات</span>
+                <button onclick="document.getElementById('pdf-input').click()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold py-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-200 transition-colors mb-3">
+                    اختيار ملفات PDF
                 </button>
-                <div id="pdf-list" class="space-y-1 mb-4"></div>
-                <button id="merge-btn" onclick="processMerge()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hidden shadow-lg">دمج الآن</button>
+                <div id="pdf-list" class="space-y-2 mb-3 max-h-32 overflow-y-auto"></div>
+                <button id="merge-btn" onclick="processMerge()" class="w-full bg-orange-500 text-white font-black py-3 rounded-xl shadow-lg shadow-orange-500/30 hidden">بدء الدمج والتحميل</button>
             </div>
 
-            <div id="img-container" class="hidden w-full max-w-md bg-white p-5 rounded-2xl shadow-xl">
-                <h3 class="text-lg font-black text-center mb-4">صور إلى PDF</h3>
+            <div class="tool-card">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="bg-emerald-100 dark:bg-emerald-900/50 p-3 rounded-2xl text-emerald-600"><i data-lucide="images" class="w-8 h-8"></i></div>
+                    <div>
+                        <h3 class="font-black text-lg">صور إلى PDF</h3>
+                        <p class="text-xs text-slate-500">حول ملخصاتك لملف PDF عالي الجودة</p>
+                    </div>
+                </div>
                 <input type="file" id="img-input" multiple accept="image/*" class="hidden" onchange="handleImages(this)">
-                <button onclick="document.getElementById('img-input').click()" class="w-full border-2 border-dashed border-emerald-200 p-8 rounded-xl font-bold text-emerald-600 flex flex-col items-center gap-2 mb-4">
-                    <i data-lucide="image"></i><span>اختر الصور</span>
+                <button onclick="document.getElementById('img-input').click()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold py-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-200 transition-colors mb-3">
+                    اختيار الصور
                 </button>
-                <div id="img-grid" class="grid grid-cols-3 gap-2 mb-4"></div>
-                <button id="img-conv-btn" onclick="convertImagesToPdf()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hidden shadow-lg">تحويل لـ PDF</button>
+                <div id="img-grid" class="grid grid-cols-4 gap-2 mb-3"></div>
+                <button id="img-btn" onclick="processImages()" class="w-full bg-emerald-500 text-white font-black py-3 rounded-xl shadow-lg shadow-emerald-500/30 hidden">تحويل الصور لـ PDF</button>
             </div>
-        </div>
+        </section>
+    </main>
 
-        <!-- Home View -->
-        <div id="home-view" class="flex-1 flex flex-col items-center justify-center p-4 bg-slate-200 overflow-y-auto">
-            <div class="text-center mb-6">
-                <h2 class="text-2xl font-black text-slate-800">منصة الإبداع للهاتف</h2>
-                <p class="text-xs text-slate-500 font-medium">الأداة رقم 1 للتقارير الجامعية</p>
-            </div>
-            <div class="grid grid-cols-2 gap-3 w-full max-w-md px-2">
-                <div onclick="switchMode('word')" class="bg-white p-5 rounded-2xl shadow shadow-blue-100 cursor-pointer text-center border-b-4 border-blue-600 active:scale-95 transition-all">
-                    <i data-lucide="file-text" class="w-8 h-8 text-blue-600 mx-auto mb-2"></i>
-                    <h3 class="font-black text-xs">محرر وورد</h3>
-                </div>
-                <div onclick="switchMode('cover')" class="bg-white p-5 rounded-2xl shadow shadow-purple-100 cursor-pointer text-center border-b-4 border-purple-600 active:scale-95 transition-all">
-                    <i data-lucide="layout-template" class="w-8 h-8 text-purple-600 mx-auto mb-2"></i>
-                    <h3 class="font-black text-xs">مصمم أغلفة</h3>
-                </div>
-                <div onclick="switchMode('pdfmerge')" class="bg-white p-5 rounded-2xl shadow shadow-orange-100 cursor-pointer text-center border-b-4 border-orange-600 active:scale-95 transition-all">
-                    <i data-lucide="combine" class="w-8 h-8 text-orange-600 mx-auto mb-2"></i>
-                    <h3 class="font-black text-xs">دمج PDF</h3>
-                </div>
-                <div onclick="switchMode('imgtopdf')" class="bg-white p-5 rounded-2xl shadow shadow-emerald-100 cursor-pointer text-center border-b-4 border-emerald-600 active:scale-95 transition-all">
-                    <i data-lucide="image" class="w-8 h-8 text-emerald-600 mx-auto mb-2"></i>
-                    <h3 class="font-black text-xs">صور إلى PDF</h3>
-                </div>
-            </div>
-            <div class="mt-8 text-center text-[10px] text-slate-400 font-bold">مصمم خصيصاً للهواتف الذكية 📱</div>
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchNav('editor', this)">
+            <i data-lucide="file-edit"></i><span>المحرر</span>
         </div>
-    </div>
+        <div class="nav-item" onclick="switchNav('cover', this)">
+            <i data-lucide="layout-template"></i><span>الأغلفة</span>
+        </div>
+        <div class="nav-item" onclick="switchNav('tools', this)">
+            <i data-lucide="file-cog"></i><span>أدوات PDF</span>
+        </div>
+    </nav>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white px-6 py-2 rounded-xl text-[10px] font-bold opacity-0 transition-all z-[9999] pointer-events-none shadow-xl"></div>
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full text-xs font-bold opacity-0 transition-all z-[2000] shadow-lg pointer-events-none transform -translate-y-4"></div>
 
     <script>
         lucide.createIcons();
-        let currentMode = 'home';
         let pdfQueue = [];
         let imgQueue = [];
 
-        function changeTheme(theme) {
-            document.getElementById('app-body').className = 'flex flex-col h-screen ' + theme;
-            showToast("تم تغيير الثيم");
-        }
-
-        function showHome() {
-            currentMode = 'home';
-            document.getElementById('home-view').classList.remove('hidden');
-            document.getElementById('workspace').classList.add('hidden');
-            document.getElementById('ribbon-bar').classList.add('hidden');
-            const label = document.getElementById('mode-label');
-            if(label) label.innerText = "الرئيسية";
-            updateTabs();
-        }
-
-        function switchMode(mode) {
-            currentMode = mode;
-            document.getElementById('home-view').classList.add('hidden');
-            document.getElementById('workspace').classList.remove('hidden');
+        // --- Navigation Logic ---
+        function switchNav(viewId, el) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
             
-            const ribbon = document.getElementById('ribbon-bar');
-            const editor = document.getElementById('editor-container');
-            const merge = document.getElementById('merge-container');
-            const img = document.getElementById('img-container');
-            const coverTools = document.getElementById('cover-extra-ribbon');
-            const label = document.getElementById('mode-label');
-            const ed = document.getElementById('editor');
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
 
-            [ribbon, editor, merge, img, coverTools].forEach(el => { if(el) el.classList.add('hidden'); });
-
-            if (mode === 'word' || mode === 'cover') {
-                ribbon.classList.remove('hidden');
-                editor.classList.remove('hidden');
-                if(label) label.innerText = mode === 'word' ? "وورد" : "أغلفة";
-                
-                if(mode === 'cover') {
-                    coverTools.classList.remove('hidden');
-                    ed.className = "paper frame-classic";
-                } else {
-                    ed.className = "paper";
-                }
-                
-                if(!ed.innerHTML || ed.innerHTML.trim() === "") ed.innerHTML = "<h1>مستند جديد</h1><p>ابدأ الكتابة هنا...</p>";
-            } else if (mode === 'pdfmerge') {
-                merge.classList.remove('hidden');
-                if(label) label.innerText = "دمج PDF";
-            } else if (mode === 'imgtopdf') {
-                img.classList.remove('hidden');
-                if(label) label.innerText = "صور لـ PDF";
+            const titles = { 'editor': 'محرر النصوص', 'cover': 'مصمم الأغلفة', 'tools': 'أدوات دمج وتحويل PDF' };
+            document.getElementById('header-subtitle').innerText = titles[viewId];
+            
+            if(viewId === 'cover' && document.getElementById('cover-editor').innerHTML === '') {
+                insertCover();
             }
-            updateTabs();
-            showToast(`تم فتح ${mode}`);
         }
 
-        function updateTabs() {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            const map = { home: 'tab-home', word: 'tab-word', cover: 'tab-cover', pdfmerge: 'tab-merge', imgtopdf: 'tab-img' };
-            const activeTab = document.getElementById(map[currentMode]);
-            if(activeTab) activeTab.classList.add('active');
+        // --- Theme ---
+        let isDark = false;
+        function toggleTheme() {
+            isDark = !isDark;
+            document.body.classList.toggle('dark-mode', isDark);
+            document.getElementById('theme-icon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+            lucide.createIcons();
         }
 
-        function exec(cmd, val = null) { document.execCommand(cmd, false, val); document.getElementById('editor').focus(); }
-        function applyFrame(cls) { document.getElementById('editor').className = cls; showToast("تم تطبيق الإطار"); }
-        function moveFrame(v) { document.getElementById('editor').style.padding = (v/50) + "cm"; }
-        
-        function resizeLogo(s) { 
-            const l = document.getElementById('university-logo'); 
-            if(l) { l.style.width = s + 'px'; }
-        }
-        
-        function moveLogoH(v) {
-            const l = document.getElementById('university-logo');
-            if(l) { l.style.transform = `translateX(${v}px)`; }
+        // --- Formatting ---
+        function exec(cmd, val = null) {
+            document.execCommand(cmd, false, val);
+            document.getElementById('editor').focus();
         }
 
-        function triggerLogoUpload(el) {
+        // --- Editor Image Insertion ---
+        function triggerEditorImageUpload() { document.getElementById('editor-img-upload').click(); }
+        function insertImageToEditor(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgHtml = `<br><img src="${e.target.result}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 10px auto; display: block;" /><br>`;
+                    exec('insertHTML', imgHtml);
+                    showToast("✅ تم إدراج الصورة بنجاح");
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+            input.value = "";
+        }
+
+        // ==========================================
+        //  الحل النهائي لحفظ الـ PDF واللغة العربية
+        // ==========================================
+        async function savePDF(editorId) {
+            showToast("⏳ جاري إنشاء ملف PDF عالي الدقة...");
+            const element = document.getElementById(editorId);
+            const originalShadow = element.style.boxShadow;
+            element.style.boxShadow = 'none';
+
+            try {
+                const dataUrl = await htmlToImage.toJpeg(element, {
+                    quality: 1.0,
+                    pixelRatio: 2,
+                    backgroundColor: '#ffffff'
+                });
+
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                
+                const imgProps = pdf.getImageProperties(dataUrl);
+                const imgHeightInMm = (imgProps.height * pdfWidth) / imgProps.width;
+
+                let heightLeft = imgHeightInMm;
+                let position = 0;
+
+                pdf.addImage(dataUrl, 'JPEG', 0, position, pdfWidth, imgHeightInMm);
+                heightLeft -= pageHeight;
+
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeightInMm;
+                    pdf.addPage();
+                    pdf.addImage(dataUrl, 'JPEG', 0, position, pdfWidth, imgHeightInMm);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save(`CreativeDoc_${Date.now()}.pdf`);
+                showToast("✅ تم الحفظ المباشر بنجاح!");
+                
+            } catch (err) {
+                console.error(err);
+                showToast("❌ حدث خطأ، يرجى المحاولة مرة أخرى.");
+            } finally {
+                element.style.boxShadow = originalShadow;
+            }
+        }
+
+        // --- Word Export ---
+        function saveWord(editorId) {
+            const content = document.getElementById(editorId).innerHTML;
+            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40' dir='rtl'><head><meta charset='utf-8' /><style>body{font-family:'Cairo', sans-serif;} .paper{padding:2cm;}</style></head><body>";
+            const blob = new Blob(['\ufeff', header + content + "</body></html>"], { type: 'application/msword' });
+            const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Document_${Date.now()}.doc`; a.click();
+            showToast("✅ تم تنزيل ملف Word");
+        }
+
+        // --- Cover Designer Full Control ---
+        let logoState = { scale: 120, x: 0, y: 0 };
+        function updateLogoTransform(prop, val) {
+            logoState[prop] = val;
+            const logoImg = document.getElementById('cover-logo');
+            const logoBox = document.getElementById('logo-box');
+            
+            if(logoImg) {
+                logoImg.style.width = logoState.scale + 'px';
+                logoImg.style.transform = `translate(${logoState.x}px, ${logoState.y}px)`;
+            } else if(logoBox) {
+                logoBox.style.width = logoState.scale + 'px';
+                logoBox.style.minHeight = logoState.scale + 'px';
+                logoBox.style.transform = `translate(${logoState.x}px, ${logoState.y}px)`;
+            }
+        }
+        function applyFrame(val) { document.getElementById('cover-editor').className = `paper ${val}`; }
+
+        function triggerLogoUpload() {
             const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*';
             i.onchange = e => {
-                const f = e.target.files[0];
-                if (f) {
+                if (e.target.files[0]) {
                     const r = new FileReader();
                     r.onload = ev => {
-                        el.innerHTML = `<img id="university-logo" src="${ev.target.result}" style="width:100px; height:auto; object-fit:contain; margin:0 auto; position:relative;" />`;
-                        el.style.border = 'none'; el.style.background = 'transparent';
+                        const container = document.getElementById('logo-box');
+                        container.innerHTML = `<img id="cover-logo" src="${ev.target.result}" style="width:${logoState.scale}px; height:auto; object-fit:contain; margin:0 auto; transform: translate(${logoState.x}px, ${logoState.y}px);" />`;
+                        container.style.border = 'none'; container.style.background = 'transparent';
                     };
-                    r.readAsDataURL(f);
+                    r.readAsDataURL(e.target.files[0]);
                 }
             }; i.click();
         }
 
-        function insertCoverTemplate() {
-            const t = `
-                <div style="text-align: center; position: relative; height: 100%; border: 0 !important; pointer-events: auto; display:flex; flex-direction:column;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; font-size: 13px; font-weight: bold; line-height: 1.5; text-align:right;">
-                        <div contenteditable="true" style="flex:1;">جمهورية العراق<br />وزارة التعليم العالي<br />اسم الجامعة<br />اسم الكلية</div>
-                        <div id="logo-container" onclick="triggerLogoUpload(this)" style="width: 80px; min-height: 80px; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 8px; color: #aaa; cursor: pointer; background: #fcfcfc;">انقر للشعار</div>
+        function insertCover() {
+            logoState = { scale: 120, x: 0, y: 0 };
+            const html = `
+                <div style="display:flex; flex-direction:column; height:100%;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; font-size: 16px; font-weight: 800;">
+                        <div contenteditable="true" style="line-height:1.6; position:relative; z-index:2;">جمهورية العراق<br>وزارة التعليم العالي والبحث العلمي<br>اسم الجامعة<br>الكلية والقسم</div>
+                        <div id="logo-box" onclick="triggerLogoUpload()" style="width: 120px; min-height: 120px; border: 2px dashed #cbd5e1; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #94a3b8; cursor: pointer; background: #f8fafc; z-index:1;">أضف الشعار</div>
                     </div>
-                    <div style="margin: 60px 0; flex-grow:1;">
-                        <h1 contenteditable="true" style="font-size: 32px; font-weight: 900; margin-bottom: 20px;">عنوان التقرير</h1>
-                        <p contenteditable="true" style="font-size: 18px; font-weight: bold; color: #444;">وصف البحث</p>
+                    <div style="text-align:center; margin: 80px 0; flex-grow:1; position:relative; z-index:2;">
+                        <h1 contenteditable="true" style="font-size: 46px; font-weight: 900; color: #1e1b4b; margin-bottom: 20px;">عنوان البحث أو التقرير</h1>
+                        <p contenteditable="true" style="font-size: 24px; font-weight: 700; color: #475569;">وصف للمادة أو البحث</p>
                     </div>
-                    <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
-                        <p style="font-size: 16px; font-weight: bold;">إعداد الطالب/ة</p>
-                        <p contenteditable="true" style="font-size: 24px; color: #d00; font-family: 'Amiri'; font-weight: 900;">اسم الطالب</p>
+                    <div style="display:flex; justify-content:space-between; margin-top: 30px; position:relative; z-index:2;">
+                        <div style="text-align:right;">
+                            <p style="font-size: 22px; font-weight: 800; color: #334155;">إعداد الطالب/ة</p>
+                            <p contenteditable="true" style="font-size: 32px; color: #b91c1c; font-family: 'Amiri'; font-weight: 900;">الاسم الثلاثي</p>
+                        </div>
+                        <div style="text-align:left;">
+                            <p style="font-size: 22px; font-weight: 800; color: #334155;">بإشراف</p>
+                            <p contenteditable="true" style="font-size: 32px; color: #b91c1c; font-family: 'Amiri'; font-weight: 900;">اسم الأستاذ</p>
+                        </div>
                     </div>
-                    <div style="margin-top:auto; padding-top:20px; font-weight:bold; color:#888;">2024 م - Iraq</div>
+                    <div style="text-align:center; margin-top:50px; font-weight:900; color:#94a3b8; font-size:18px;">2026 م - 1447 هـ</div>
                 </div>`;
-            document.getElementById('editor').innerHTML = t;
-            showToast("تم إدراج القالب");
+            document.getElementById('cover-editor').innerHTML = html;
+            document.querySelectorAll('.cover-controls input[type="range"]').forEach(el => el.value = el.defaultValue);
         }
 
-        function handleImages(input) {
-            const fs = Array.from(input.files);
-            for (let f of fs) {
-                const r = new FileReader();
-                r.onload = e => { imgQueue.push({ data: e.target.result, type: f.type }); renderImgGrid(); };
-                r.readAsDataURL(f);
-            }
-        }
-        function renderImgGrid() {
-            const g = document.getElementById('img-grid');
-            g.innerHTML = imgQueue.map((im, i) => `<div class="relative"><img src="${im.data}" class="h-20 w-full object-cover rounded-lg"></div>`).join('');
-            document.getElementById('img-conv-btn').classList.toggle('hidden', imgQueue.length === 0);
-        }
-        async function convertImagesToPdf() {
-            showToast("جاري المعالجة...");
-            try {
-                const pdf = await PDFLib.PDFDocument.create();
-                for (let iq of imgQueue) {
-                    const b = Uint8Array.from(atob(iq.data.split(',')[1]), c => c.charCodeAt(0));
-                    const img = iq.type === 'image/png' ? await pdf.embedPng(b) : await pdf.embedJpg(b);
-                    const pg = pdf.addPage([595.28, 841.89]);
-                    const { width, height } = img.scaleToFit(595, 841);
-                    pg.drawImage(img, { x: (595 - width) / 2, y: (841 - height) / 2, width, height });
-                }
-                const bytes = await pdf.save();
-                const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([bytes], {type:'application/pdf'})); a.download = 'images.pdf'; a.click();
-                showToast("تم التحميل");
-            } catch (e) { showToast("خطأ أثناء التحويل"); }
-        }
-
+        // --- PDF Tools ---
         function handlePdfs(input) {
-            const fs = Array.from(input.files);
-            for (let f of fs) {
+            Array.from(input.files).forEach(f => {
                 const r = new FileReader();
                 r.onload = e => { pdfQueue.push({ name: f.name, data: e.target.result }); renderPdfList(); };
                 r.readAsArrayBuffer(f);
-            }
+            });
         }
         function renderPdfList() {
-            const l = document.getElementById('pdf-list');
-            l.innerHTML = pdfQueue.map((p, i) => `<div class="bg-white p-2 text-[10px] border rounded-lg flex justify-between items-center"><span class="font-bold truncate max-w-[150px]">${p.name}</span><button onclick="pdfQueue.splice(${i},1);renderPdfList();" class="text-red-500">حذف</button></div>`).join('');
-            document.getElementById('merge-btn').classList.toggle('hidden', pdfQueue.length < 2);
+            document.getElementById('pdf-list').innerHTML = pdfQueue.map((p, i) => `<div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 flex justify-between items-center"><span class="text-sm font-bold truncate pr-2">${p.name}</span><button onclick="pdfQueue.splice(${i},1);renderPdfList();" class="text-red-500 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`).join('');
+            document.getElementById('merge-btn').style.display = pdfQueue.length > 1 ? 'block' : 'none';
+            lucide.createIcons();
         }
         async function processMerge() {
-            showToast("جاري الدمج...");
+            showToast("⏳ جاري دمج الملفات...");
             try {
                 const pdf = await PDFLib.PDFDocument.create();
                 for (let pq of pdfQueue) {
@@ -460,39 +635,54 @@
                     pgs.forEach(page => pdf.addPage(page));
                 }
                 const bytes = await pdf.save();
-                const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([bytes], {type:'application/pdf'})); a.download = 'merged.pdf'; a.click();
-                showToast("تم الدمج");
-            } catch (e) { showToast("فشل الدمج"); }
+                const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([bytes])); a.download = 'Merged_Document.pdf'; a.click();
+                showToast("✅ تم دمج وتنزيل الملف بنجاح");
+            } catch(e) { showToast("❌ حدث خطأ في الدمج"); }
         }
 
-        async function savePDF() {
-            const el = document.getElementById('editor');
-            showToast("جاري التصدير...");
-            const opt = { margin: 0, filename: 'report.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-            await html2pdf().set(opt).from(el).save();
-            showToast("تم الحفظ");
+        function handleImages(input) {
+            Array.from(input.files).forEach(f => {
+                const r = new FileReader();
+                r.onload = e => { imgQueue.push({ data: e.target.result, type: f.type }); renderImgGrid(); };
+                r.readAsDataURL(f);
+            });
+        }
+        function renderImgGrid() {
+            document.getElementById('img-grid').innerHTML = imgQueue.map((im, i) => `<div class="relative rounded-xl overflow-hidden border border-slate-200"><img src="${im.data}" class="w-full h-20 object-cover"><button onclick="imgQueue.splice(${i},1);renderImgGrid();" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"><i data-lucide="x" class="w-3 h-3"></i></button></div>`).join('');
+            document.getElementById('img-btn').style.display = imgQueue.length > 0 ? 'block' : 'none';
+            lucide.createIcons();
+        }
+        async function processImages() {
+            showToast("⏳ جاري تحويل الصور لـ PDF...");
+            try {
+                const pdf = await PDFLib.PDFDocument.create();
+                for (let iq of imgQueue) {
+                    const b = Uint8Array.from(atob(iq.data.split(',')[1]), c => c.charCodeAt(0));
+                    const img = iq.type === 'image/png' ? await pdf.embedPng(b) : await pdf.embedJpg(b);
+                    const pg = pdf.addPage([595.28, 841.89]);
+                    const { width, height } = img.scaleToFit(595, 841);
+                    pg.drawImage(img, { x: (595-width)/2, y: (841-height)/2, width, height });
+                }
+                const bytes = await pdf.save();
+                const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([bytes])); a.download = 'Images_To_PDF.pdf'; a.click();
+                showToast("✅ تم تحويل الصور بنجاح");
+            } catch(e) { showToast("❌ خطأ في التحويل"); }
         }
 
-        function saveAsWord() {
-            const content = document.getElementById('editor').innerHTML;
-            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40' dir='rtl'><head><meta charset='utf-8' /><style>body{font-family:'Cairo', sans-serif;} .paper{padding:1cm;}</style></head><body>";
-            const bl = new Blob(['\ufeff', header + content + "</body></html>"], { type: 'application/msword' });
-            const a = document.createElement("a"); a.href = URL.createObjectURL(bl); a.download = 'report.doc'; a.click();
-            showToast("تم تصدير DOC");
+        function showToast(m) {
+            const t = document.getElementById('toast');
+            t.innerText = m; t.style.opacity = '1'; t.style.transform = 'translate(-50%, 0)';
+            setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translate(-50%, -16px)'; }, 3500);
         }
 
         function insertTable() {
-            const r = prompt("الصفوف:", "3"); const c = prompt("الأعمدة:", "3");
+            const r = prompt("عدد الصفوف:", "3"); const c = prompt("عدد الأعمدة:", "3");
             if(!r || !c) return;
-            let h = "<table border='1' style='width:100%; border-collapse:collapse;'>";
-            for(let i=0; i<r; i++) { h += "<tr>"; for(let j=0; j<c; j++) h += "<td style='border:1px solid #ddd; padding:4px;'>...</td>"; h += "</tr>"; }
-            h += "</table><p><br /></p>";
+            let h = "<table border='1' style='width:100%; border-collapse:collapse; margin:20px 0;'>";
+            for(let i=0; i<r; i++) { h += "<tr>"; for(let j=0; j<c; j++) h += "<td style='border:1px solid #cbd5e1; padding:10px;'>نص</td>"; h += "</tr>"; }
+            h += "</table><p><br/></p>";
             exec("insertHTML", h);
         }
-
-        function showToast(m) { const t = document.getElementById('toast'); if(t){ t.innerText = m; t.style.opacity = '1'; setTimeout(() => { t.style.opacity = '0'; }, 3000); } }
-
-        window.onload = () => { lucide.createIcons(); showHome(); };
     </script>
 </body>
 </html>
